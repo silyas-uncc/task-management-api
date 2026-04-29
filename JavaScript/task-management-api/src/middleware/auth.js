@@ -40,4 +40,49 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-module.exports = { authenticate };
+const checkOwnership = (resourceType) => {
+  return async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      
+      let resource;
+      
+      switch (resourceType) {
+        case 'project':
+          resource = await prisma.project.findUnique({
+            where: { id }
+          });
+          break;
+        case 'task':
+          resource = await prisma.task.findUnique({
+            where: { id }
+          });
+          break;
+        case 'category':
+          resource = await prisma.category.findUnique({
+            where: { id }
+          });
+          break;
+        default:
+          return res.status(400).json({ error: 'Invalid resource type' });
+      }
+      
+      if (!resource) {
+        return res.status(404).json({ error: `${resourceType} not found` });
+      }
+      
+      if (resource.ownerId !== userId) {
+        return res.status(403).json({ error: 'You do not have permission to access this resource' });
+      }
+      
+      req.resource = resource;
+      next();
+    } catch (error) {
+      console.error('Ownership check error:', error);
+      return res.status(500).json({ error: 'Authorization error' });
+    }
+  };
+};
+
+module.exports = { authenticate, checkOwnership };
