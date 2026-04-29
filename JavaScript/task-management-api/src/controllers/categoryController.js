@@ -1,41 +1,23 @@
-const { PrismaClient } = require('@prisma/client');
-
-const prisma = new PrismaClient();
+const categoryService = require('../services/categoryService');
 
 const createCategory = async (req, res, next) => {
   try {
-    const { name } = req.body;
     const userId = req.user.id;
-    
-    if (!name) {
-      return res.status(400).json({ error: 'Category name is required' });
-    }
-    
-    const category = await prisma.category.create({
-      data: {
-        name,
-        ownerId: userId
-      }
-    });
-    
+    const category = await categoryService.createCategory(userId, req.body);
     res.status(201).json(category);
   } catch (error) {
-    if (error.code === 'P2002') {
-      return res.status(409).json({ error: 'Category with this name already exists' });
+    if (error.status) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      next(error);
     }
-    next(error);
   }
 };
 
 const getCategories = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    
-    const categories = await prisma.category.findMany({
-      where: { ownerId: userId },
-      orderBy: { name: 'asc' }
-    });
-    
+    const categories = await categoryService.getUserCategories(userId);
     res.status(200).json(categories);
   } catch (error) {
     next(error);
@@ -44,90 +26,46 @@ const getCategories = async (req, res, next) => {
 
 const getCategoryById = async (req, res, next) => {
   try {
-    const { id } = req.params;
     const userId = req.user.id;
-    
-    const category = await prisma.category.findFirst({
-      where: {
-        id: id,
-        ownerId: userId
-      }
-    });
-    
-    if (!category) {
-      return res.status(404).json({ error: 'Category not found' });
-    }
-    
+    const { id } = req.params;
+    const category = await categoryService.getCategoryById(userId, id);
     res.status(200).json(category);
   } catch (error) {
-    next(error);
+    if (error.status) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      next(error);
+    }
   }
 };
 
 const updateCategory = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const { name } = req.body;
     const userId = req.user.id;
-    
-    if (!name) {
-      return res.status(400).json({ error: 'Category name is required' });
-    }
-    
-    const existingCategory = await prisma.category.findFirst({
-      where: {
-        id: id,
-        ownerId: userId
-      }
-    });
-    
-    if (!existingCategory) {
-      return res.status(404).json({ error: 'Category not found' });
-    }
-    
-    const category = await prisma.category.update({
-      where: { id },
-      data: { name }
-    });
-    
+    const { id } = req.params;
+    const category = await categoryService.updateCategory(userId, id, req.body);
     res.status(200).json(category);
   } catch (error) {
-    if (error.code === 'P2002') {
-      return res.status(409).json({ error: 'Category with this name already exists' });
+    if (error.status) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      next(error);
     }
-    if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Category not found' });
-    }
-    next(error);
   }
 };
 
 const deleteCategory = async (req, res, next) => {
   try {
-    const { id } = req.params;
     const userId = req.user.id;
-    
-    const existingCategory = await prisma.category.findFirst({
-      where: {
-        id: id,
-        ownerId: userId
-      }
-    });
-    
-    if (!existingCategory) {
-      return res.status(404).json({ error: 'Category not found' });
-    }
-    
-    await prisma.category.delete({
-      where: { id }
-    });
-    
-    res.status(200).json({ message: 'Category deleted successfully' });
+    const { id } = req.params;
+    const result = await categoryService.deleteCategory(userId, id);
+    res.status(200).json(result);
   } catch (error) {
-    if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Category not found' });
+    if (error.status) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      next(error);
     }
-    next(error);
   }
 };
 
