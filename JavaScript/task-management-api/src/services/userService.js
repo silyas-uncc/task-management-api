@@ -32,7 +32,8 @@ class UserService {
     const user = await userRepository.create({
       username,
       email,
-      passwordHash: hashedPassword
+      passwordHash: hashedPassword,
+      role: 'USER'  // Add default role for new signups
     });
     
     return user;
@@ -57,18 +58,21 @@ class UserService {
       throw { status: 401, message: 'Invalid email or password' };
     }
     
+  
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
     
+
     return {
       token,
       user: {
         id: user.id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        role: user.role 
       }
     };
   }

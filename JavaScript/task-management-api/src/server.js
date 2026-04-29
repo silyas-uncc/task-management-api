@@ -9,13 +9,14 @@ const path = require('path');
 dotenv.config();
 
 // Import routes
-const authRoutes = require('./src/routes/auth');
-const projectRoutes = require('./src/routes/projects');
-const taskRoutes = require('./src/routes/tasks');
-const categoryRoutes = require('./src/routes/categories');
+const authRoutes = require('./routes/auth');
+const projectRoutes = require('./routes/projects');
+const taskRoutes = require('./routes/tasks');
+const categoryRoutes = require('./routes/categories');
+const adminRoutes = require('./routes/admin');
 
 // Import middleware
-const errorHandler = require('./src/middleware/errorHandler');
+const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,10 +28,23 @@ app.use(express.urlencoded({ extended: true }));
 
 // Load Swagger documentation
 try {
-  const swaggerDocument = YAML.load(path.join(__dirname, './swagger/swagger.yaml'));
+  const swaggerDocument = YAML.load(path.join(__dirname, '../swagger/swagger.yaml'));
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  console.log('Swagger documentation loaded successfully');
 } catch (error) {
-  console.log('Swagger documentation not found. Please create swagger/swagger.yaml');
+  console.log('Swagger documentation not found at:', path.join(__dirname, '../swagger/swagger.yaml'));
+  console.log('Error:', error.message);
+
+  // Fallback to basic documentation
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup({
+    openapi: '3.0.0',
+    info: {
+      title: 'Task Management API',
+      version: '1.0.0',
+      description: 'API documentation'
+    },
+    servers: [{ url: 'http://localhost:3000' }]
+  }));
 }
 
 // Routes
@@ -38,6 +52,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -52,6 +67,11 @@ app.get('/', (req, res) => {
     documentation: '/api-docs',
     health: '/health'
   });
+});
+
+// Test endpoint to verify routes
+app.get('/test', (req, res) => {
+  res.json({ message: 'Test endpoint working' });
 });
 
 // Error handling middleware

@@ -17,12 +17,13 @@ async function main() {
   
   const hashedPassword = await bcrypt.hash('Password123!', 10);
   
-  // Create users
+  // Create users WITH ROLES
   const john = await prisma.user.create({
     data: {
       username: 'john_doe',
       email: 'john@example.com',
       passwordHash: hashedPassword,
+      role: 'USER',  // ADD THIS
     },
   });
   
@@ -31,6 +32,7 @@ async function main() {
       username: 'jane_smith',
       email: 'jane@example.com',
       passwordHash: hashedPassword,
+      role: 'USER',  // ADD THIS
     },
   });
   
@@ -39,11 +41,16 @@ async function main() {
       username: 'admin_user',
       email: 'admin@example.com',
       passwordHash: hashedPassword,
+      role: 'ADMIN',  // ADD THIS - CRITICAL
     },
   });
   
-  console.log('Created users: ' + john.username + ', ' + jane.username + ', ' + admin.username);
+  console.log('Created users with roles:');
+  console.log('  ' + john.username + ': ' + john.role);
+  console.log('  ' + jane.username + ': ' + jane.role);
+  console.log('  ' + admin.username + ': ' + admin.role);
   
+  // Rest of your seed code remains the same...
   // Create projects for John
   const project1 = await prisma.project.create({
     data: {
@@ -132,9 +139,9 @@ async function main() {
   
   console.log('\nDatabase seeding completed successfully');
   console.log('\nTest Credentials:');
-  console.log('   john@example.com / Password123!');
-  console.log('   jane@example.com / Password123!');
-  console.log('   admin@example.com / Password123!');
+  console.log('   john@example.com / Password123! (USER role)');
+  console.log('   jane@example.com / Password123! (USER role)');
+  console.log('   admin@example.com / Password123! (ADMIN role)');
 }
 
 main()
