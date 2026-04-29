@@ -18,6 +18,7 @@ services:
       - key: PORT
         value: 10000
 
+
 databases:
   - name: task-management-db
     databaseName: task_management
