@@ -23,7 +23,7 @@ async function main() {
       username: 'john_doe',
       email: 'john@example.com',
       passwordHash: hashedPassword,
-      role: 'USER',  // ADD THIS
+      role: 'USER', 
     },
   });
   
@@ -32,7 +32,7 @@ async function main() {
       username: 'jane_smith',
       email: 'jane@example.com',
       passwordHash: hashedPassword,
-      role: 'USER',  // ADD THIS
+      role: 'USER', 
     },
   });
   
@@ -41,7 +41,7 @@ async function main() {
       username: 'admin_user',
       email: 'admin@example.com',
       passwordHash: hashedPassword,
-      role: 'ADMIN',  // ADD THIS - CRITICAL
+      role: 'ADMIN',  
     },
   });
   
@@ -50,7 +50,6 @@ async function main() {
   console.log('  ' + jane.username + ': ' + jane.role);
   console.log('  ' + admin.username + ': ' + admin.role);
   
-  // Rest of your seed code remains the same...
   // Create projects for John
   const project1 = await prisma.project.create({
     data: {
