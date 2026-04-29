@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url     = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  
+  projects     Project[]
+  tasks        Task[]
+  categories   Category[]
+  
+  @@map("users")
+}
+
+model Project {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  ownerId     String    @map("owner_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  
+  owner       User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+  
+  @@map("projects")
+}
+
+model Task {
+  id          String      @id @default(uuid())
+  title       String
+  description String?
+  status      TaskStatus  @default(PENDING)
+  dueDate     DateTime?   @map("due_date")
+  projectId   String      @map("project_id")
+  ownerId     String      @map("owner_id")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  owner       User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  categories  TaskCategory[]
+  
+  @@map("tasks")
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+  ownerId     String    @map("owner_id")
+  
+  owner       User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  tasks       TaskCategory[]
+  
+  @@unique([name, ownerId])
+  @@map("categories")
+}
+
+model TaskCategory {
+  taskId      String    @map("task_id")
+  categoryId  String    @map("category_id")
+  
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  @@id([taskId, categoryId])
+  @@map("task_categories")
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
