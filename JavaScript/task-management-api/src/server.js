@@ -9,13 +9,13 @@ const path = require('path');
 dotenv.config();
 
 // Import routes
-const authRoutes = require('./routes/auth');
-const projectRoutes = require('./routes/projects');
-const taskRoutes = require('./routes/tasks');
-const categoryRoutes = require('./routes/categories');
+const authRoutes = require('./src/routes/auth');
+const projectRoutes = require('./src/routes/projects');
+const taskRoutes = require('./src/routes/tasks');
+const categoryRoutes = require('./src/routes/categories');
 
 // Import middleware
-const errorHandler = require('./middleware/errorHandler');
+const errorHandler = require('./src/middleware/errorHandler');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
