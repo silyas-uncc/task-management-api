@@ -13,7 +13,7 @@ info:
 servers:
   - url: http://localhost:3000
     description: Development server
-  - url: https://your-render-url.onrender.com
+  - url: https://task-management-api-1-cec9.onrender.com
     description: Production server
 
 components:
